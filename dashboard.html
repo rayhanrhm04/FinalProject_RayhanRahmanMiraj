@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetailRay</title>
+    
+    <script src="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@latest/dist/maplibre-gl.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="splash-screen">
+    <div class="splash-content">
+        <i class="fa-solid fa-map-location-dot splash-icon"></i>
+        <h1 class="splash-title">RetailRay</h1>
+        <div class="splash-loader"></div>
+        <p class="splash-text">Memuat Peta & Data Distribusi...</p>
+    </div>
+</div>
+
+<button id="mobile-menu" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i> Menu</button>
+
+<div id="sidebar">
+    <div class="sidebar-header">
+        <h2><i class="fa-solid fa-map-location-dot"></i> RetailRay</h2>
+        <button id="close-sidebar" onclick="toggleSidebar()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <span class="subtitle">Dashboard Intelligence for Retail Analysis</span>
+    
+    <div class="search-container">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" autocomplete="off" placeholder="Cari gerai atau lokasi...">
+        <ul id="search-results"></ul>
+    </div>
+    
+    <div class="brand-card alfa">
+        <div class="brand-header">
+            <div class="brand-title"><i class="fa-solid fa-store" style="color:var(--accent-alfa)"></i> Alfamart</div>
+            <label class="switch"><input type="checkbox" checked onchange="toggleLayer('alfa-layer')"><span class="slider"></span></label>
+        </div>
+        <span class="stats-num" id="count-alfa">---</span> <span class="stats-label">titik distribusi</span>
+        <button class="btn-action" onclick="openTable('alfa-layer')"><i class="fa-solid fa-table-list"></i> Buka Tabel</button>
+    </div>
+
+    <div class="brand-card indo">
+        <div class="brand-header">
+            <div class="brand-title"><i class="fa-solid fa-store" style="color:var(--accent-indo)"></i> Indomaret</div>
+            <label class="switch"><input type="checkbox" checked onchange="toggleLayer('indo-layer')"><span class="slider"></span></label>
+        </div>
+        <span class="stats-num" id="count-indo">---</span> <span class="stats-label">titik distribusi</span>
+        <button class="btn-action" onclick="openTable('indo-layer')"><i class="fa-solid fa-table-list"></i> Buka Tabel</button>
+    </div>
+
+    <div class="brand-card borma">
+        <div class="brand-header">
+            <div class="brand-title"><i class="fa-solid fa-cart-shopping" style="color:var(--accent-borma)"></i> Borma</div>
+            <label class="switch"><input type="checkbox" checked onchange="toggleLayer('borma-layer')"><span class="slider"></span></label>
+        </div>
+        <span class="stats-num" id="count-borma">---</span> <span class="stats-label">titik distribusi</span>
+        <button class="btn-action" onclick="openTable('borma-layer')"><i class="fa-solid fa-table-list"></i> Buka Tabel</button>
+    </div>
+
+    <div class="brand-card ck">
+        <div class="brand-header">
+            <div class="brand-title"><i class="fa-solid fa-mug-hot" style="color:var(--accent-ck)"></i> Circle K</div>
+            <label class="switch"><input type="checkbox" checked onchange="toggleLayer('ck-layer')"><span class="slider"></span></label>
+        </div>
+        <span class="stats-num" id="count-ck">---</span> <span class="stats-label">titik distribusi</span>
+        <button class="btn-action" onclick="openTable('ck-layer')"><i class="fa-solid fa-table-list"></i> Buka Tabel</button>
+    </div>
+
+    <div class="brand-card griya">
+        <div class="brand-header">
+            <div class="brand-title"><i class="fa-solid fa-basket-shopping" style="color:var(--accent-griya)"></i> Griya</div>
+            <label class="switch"><input type="checkbox" checked onchange="toggleLayer('griya-layer')"><span class="slider"></span></label>
+        </div>
+        <span class="stats-num" id="count-griya">---</span> <span class="stats-label">titik distribusi</span>
+        <button class="btn-action" onclick="openTable('griya-layer')"><i class="fa-solid fa-table-list"></i> Buka Tabel</button>
+    </div>
+
+    <div id="custom-layers-container"></div>
+
+    <div id="add-layer-panel" class="add-layer-panel">
+        <strong style="display:block; margin-bottom:12px; font-size:0.85rem; color:#10b981;"><i class="fa-solid fa-plus-circle"></i> Tambah Layer Eksternal (API)</strong>
+        <input type="text" id="custom-name" placeholder="Nama Data (Misal: SPBU Pertamina)" class="custom-input">
+        <input type="text" id="custom-url" placeholder="URL API (Format GeoJSON)" class="custom-input">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+            <label style="font-size:0.75rem; color:#94a3b8;">Warna Titik Peta:</label>
+            <input type="color" id="custom-color" value="#00e5ff" class="custom-color-picker">
+        </div>
+        <button id="btn-add-layer" onclick="addCustomLayer()" class="btn-action" style="margin-top:12px; background:#10b981; border:none; color:#fff; font-weight:bold;"><i class="fa-solid fa-cloud-arrow-down"></i> Muat Data</button>
+    </div>
+
+    <div id="heatmap-panel">
+        <strong style="font-size:0.85rem; color:#ef4444;"><i class="fa-solid fa-fire"></i> Mode Heatmap</strong>
+        <label class="switch"><input type="checkbox" id="toggle-heat" onchange="toggleHeatmap()"><span class="slider"></span></label>
+    </div>
+
+    <div id="info-panel">
+        <strong style="display:block; margin-bottom:5px; font-size:0.8rem; color:#10b981;">SELECTED ASSET</strong>
+        <div id="detail-content" style="font-size: 0.85rem; line-height: 1.4;">Klik titik pada peta untuk detail.</div>
+    </div>
+</div>
+
+<div id="map"></div>
+
+<div id="map-tools">
+    <button class="fab-tool" onclick="getUserLocation()" title="Cari Lokasi Saya" style="background: #3b82f6;">
+        <i class="fa-solid fa-location-crosshairs"></i>
+    </button>
+    <button class="fab-tool" onclick="toggleBasemapPanel()" title="Ganti Basemap" style="background: #64748b;">
+        <i class="fa-solid fa-layer-group"></i>
+    </button>
+    <button id="btn-measure-tool" class="fab-tool" onclick="toggleMeasureTool()" title="Alat Ukur Jarak">
+        <i class="fa-solid fa-ruler"></i>
+    </button>
+    <button id="btn-radius-tool" class="fab-tool" onclick="toggleRadiusTool()" title="Radar & Save Layer">
+        <i class="fa-solid fa-circle-dot"></i>
+    </button>
+</div>
+
+<div id="basemap-panel" class="floating-panel" style="top: 20px; right: 80px; bottom: auto; width: 150px;">
+    <div class="panel-header"><strong>Basemap</strong></div>
+    <div class="panel-body">
+        <button class="btn-action" onclick="changeBasemap('light')" style="margin-bottom:5px; background:#f8fafc; color:#0f172a;">Light</button>
+        <button class="btn-action" onclick="changeBasemap('dark')" style="margin-bottom:5px; background:#1e293b; color:#fff;">Dark</button>
+        <!-- <button class="btn-action" onclick="changeBasemap('2d')" style="background:#748296; color:#fff;">2D Basemap</button> -->
+        <button class="btn-action" onclick="changeBasemap('satellite')" style="background:#475569; color:#fff;">Satellite</button>
+    </div>
+</div>
+
+<div id="radius-control-panel" class="floating-panel">
+    <div class="panel-header">
+        <strong>Radar Retail</strong>
+        <button onclick="deactivateRadiusTool()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="panel-body">
+        <label>Jarak:</label>
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <input type="number" id="radius-value" value="500" oninput="updateRadiusSize()">
+            <select id="radius-unit" onchange="updateRadiusSize()">
+                <option value="m">m</option>
+                <option value="km">km</option>
+            </select>
+        </div>
+        <div id="filter-stats" style="font-size:0.75rem; color:#94a3b8; margin-bottom:10px;"></div>
+        <button class="btn-action" onclick="saveRadarAsLayer()" style="background:#8b5cf6;">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan Jadi Layer
+        </button>
+    </div>
+    <div id="spatial-analysis-summary" style="margin-top: 15px; border-top: 1px solid #e2e8f0; padding-top: 10px; display:none;">
+    <h4 style="font-size: 0.75rem; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">Market Insight</h4>
+    <div id="analysis-results" class="grid-stats">
+        </div>
+</div>
+</div>
+
+<div id="measure-panel" class="floating-panel" style="bottom: 90px;">
+    <div class="panel-header">
+        <strong><i class="fa-solid fa-ruler"></i> Ukur Jarak</strong>
+        <button onclick="deactivateMeasureTool()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="panel-body">
+        <div style="font-size: 1.8rem; font-weight: 800; color: #f59e0b; text-align:center; margin: 10px 0;" id="measure-result">0 m</div>
+        <div style="font-size: 0.75rem; color: #94a3b8; text-align:center; line-height: 1.4;">Klik di peta untuk membuat titik. Klik beberapa kali untuk jalur berkelok.</div>
+        <button onclick="clearMeasurement()" class="btn-action" style="margin-top: 15px; background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid rgba(239,68,68,0.5);">Hapus Garis</button>
+    </div>
+</div>
+
+<div id="radius-control-panel" class="floating-panel">
+    <div class="panel-header">
+        <strong><i class="fa-solid fa-circle-dot"></i> Radar Retail</strong>
+        <button onclick="deactivateRadiusTool()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="panel-body">
+        <label style="font-size:0.85rem;">Jarak Jangkauan:</label>
+        <div style="display:flex; gap:10px; align-items:center; margin:10px 0;">
+            <input type="number" id="radius-value" value="500" min="100" step="100" oninput="updateRadiusSize()" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px; border-radius: 4px; width: 80px;">
+            <select id="radius-unit" onchange="updateRadiusSize()" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 5px; border-radius: 4px;">
+                <option value="m">Meter</option>
+                <option value="km">Kilometer</option>
+            </select>
+        </div>
+        <div id="filter-stats" style="font-size:0.75rem; color:#94a3b8; line-height:1.4; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.1);">
+            Klik pada peta untuk memindahkan radar.
+        </div>
+    </div>
+</div>
+
+<div id="table-modal">
+    <div class="modal-header">
+        <h3 id="modal-title" style="margin:0; font-size:1.2rem;">Data Asset</h3>
+        <button class="close-btn" onclick="document.getElementById('table-modal').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="table-wrapper">
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Nama Asset</th>
+                    <th>Kecamatan</th>
+                    <th>Alamat Full</th>
+                    <th>Longitude</th>
+                    <th>Latitude</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

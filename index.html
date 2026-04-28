@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RetailRay | Spatial Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text: #ffffff;
+            --bg: #0f172a;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Background Mesh Gradient & Orbs */
+        .bg-wrapper {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 0% 0%, #1e3a8a 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, #4338ca 0%, transparent 50%);
+        }
+        .orb {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.4;
+        }
+        .orb-1 { width: 400px; height: 400px; background: #3b82f6; top: -100px; left: -100px; }
+        .orb-2 { width: 300px; height: 300px; background: #8b5cf6; bottom: 10%; right: 5%; }
+
+        /* Navbar - Fixed Glass */
+        nav {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            backdrop-filter: blur(15px); border-bottom: 1px solid var(--glass-border);
+            padding: 15px 50px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { font-weight: 800; font-size: 1.4rem; text-decoration: none; color: #fff; }
+        .logo span { color: var(--primary); }
+        .nav-links a { text-decoration: none; color: #cbd5e1; margin-left: 25px; font-size: 0.9rem; }
+        .btn-dash { background: var(--primary); padding: 8px 20px; border-radius: 8px; font-weight: bold; }
+
+        /* Container & Layout */
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* Hero Section */
+        .hero {
+            padding-top: 180px; padding-bottom: 100px; display: flex; 
+            flex-direction: column; align-items: center; text-align: center;
+        }
+        .badge {
+            background: var(--glass); padding: 5px 15px; border-radius: 20px;
+            border: 1px solid var(--glass-border); font-size: 0.75rem; margin-bottom: 20px;
+        }
+        h1 { font-size: 3.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; max-width: 800px; }
+        .text-gradient { background: linear-gradient(to right, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: #94a3b8; max-width: 600px; margin-bottom: 40px; font-size: 1.1rem; }
+        
+        .cta-group { display: flex; gap: 15px; }
+        .btn-main { background: var(--primary); color: #fff; padding: 15px 35px; border-radius: 12px; font-weight: bold; text-decoration: none; box-shadow: 0 0 20px var(--primary-glow); }
+        .btn-outline { border: 1px solid var(--glass-border); padding: 15px 35px; border-radius: 12px; color: #fff; text-decoration: none; backdrop-filter: blur(5px); }
+
+        /* Features Section - RAPIKAN GRID */
+        .features { padding: 100px 0; }
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .feature-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 25px; 
+        }
+        .card {
+            background: var(--glass); backdrop-filter: blur(16px); 
+            border: 1px solid var(--glass-border); padding: 40px; border-radius: 24px;
+            transition: 0.3s;
+        }
+        .card:hover { transform: translateY(-10px); background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.3); }
+        .card h3 { margin: 15px 0; font-size: 1.3rem; }
+        .card p { color: #94a3b8; font-size: 0.95rem; }
+
+        /* Footer */
+        footer { padding: 50px; text-align: center; border-top: 1px solid var(--glass-border); color: #64748b; font-size: 0.85rem; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            nav { padding: 15px 20px; }
+            .nav-links { display: none; }
+        }
+        /* Showcase Styling */
+        .preview-showcase { padding: 80px 0; }
+
+        .showcase-item {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 120px;
+        }
+
+        .showcase-item.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .showcase-text { flex: 1; text-align: left; }
+        .step-no {
+            font-size: 3rem;
+            font-weight: 800;
+            color: rgba(59, 130, 246, 0.2);
+            display: block;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+        .showcase-text h3 { font-size: 2rem; margin-bottom: 20px; color: #fff; }
+        .showcase-text p { color: #94a3b8; font-size: 1.1rem; }
+
+        .showcase-img {
+            flex: 1.5;
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            transition: transform 0.5s ease;
+        }
+
+        .glass-frame {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            padding: 10px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+        }
+
+        .showcase-img img {
+            width: 100%;
+            border-radius: 12px;
+            display: block;
+            filter: brightness(0.9);
+            transition: 0.5s;
+        }
+
+        .showcase-img:hover img {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        /* Responsive Showcase */
+        @media (max-width: 992px) {
+            .showcase-item, .showcase-item.reverse {
+                flex-direction: column;
+                gap: 30px;
+                text-align: center;
+                margin-bottom: 80px;
+            }
+            .showcase-text { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-wrapper">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <nav>
+        <a href="#" class="logo">Retail<span>Ray</span></a>
+        <div class="nav-links">
+            <a href="#features">Fitur</a>
+            <a href="http://127.0.0.1:5500/dashboard.html" class="btn-dash">Buka Dashboard</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header class="hero">
+            <div class="badge">Spatial Intelligence Platform</div>
+            <h1>Kuasai Pasar Retail Bandung dengan <span class="text-gradient">Data Spasial Presisi</span></h1>
+            <p>Analisis dominasi brand, petakan kompetitor, dan temukan lokasi terbaik dalam satu dashboard interaktif.</p>
+            <div class="cta-group">
+                <a href="http://127.0.0.1:5500/dashboard.html" class="btn-main">Mulai Analisis</a>
+                <a href="#features" class="btn-outline">Pelajari Fitur</a>
+            </div>
+        </header>
+
+        <section id="features" class="features">
+            <div class="section-title">
+                <h2>Fitur Analisis Cerdas</h2>
+                <p style="color: #64748b;">Instrumen yang dirancang untuk keputusan bisnis akurat.</p>
+            </div>
+            <div class="feature-grid">
+                <div class="card">
+                    <div style="font-size: 2rem;">📡</div>
+                    <h3>Smart Radar</h3>
+                    <p>Klik di mana saja untuk menghitung Market Share dan Competition Ratio secara real-time.</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 2rem;">📍</div>
+                    <h3>Proximity Radar</h3>
+                    <p>Deteksi lawan terdekat dan ketahui status Safe, Warning, atau Danger Zone.</p>
+                </div>
+                <div class="card">
+                    <div style="font-size: 2rem;">🔥</div>
+                    <h3>Visual Heatmap</h3>
+                    <p>Identifikasi pusat keramaian untuk menemukan area potensial yang belum terjamah.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <section id="preview-showcase" class="preview-showcase">
+    <div class="section-title">
+        <h2>Eksplorasi Dashboard</h2>
+        <p style="color: #64748b;">Lihat bagaimana RetailRay bekerja mengolah data spasial.</p>
+    </div>
+
+    <div class="showcase-item">
+        <div class="showcase-text">
+            <span class="step-no">01</span>
+            <h3>Market Share Analysis</h3>
+            <p>Visualisasikan dominasi brand dalam radius tertentu. Bar chart dinamis kami memberikan angka persentase instan untuk perbandingan Alfamart vs Indomaret di satu area khusus.</p>
+        </div>
+        <div class="showcase-img glass-frame">
+            <img src="images/radar.png" alt="Radar Analysis Preview">
+        </div>
+    </div>
+
+    <div class="showcase-item reverse">
+        <div class="showcase-text">
+            <span class="step-no">02</span>
+            <h3>Competitor Proximity Radar</h3>
+            <p>Sistem akan otomatis menarik garis merah ke kompetitor terdekat. Analisis ini membantu tim ekspansi memahami seberapa ketat persaingan di titik lokasi yang dipilih.</p>
+        </div>
+        <div class="showcase-img glass-frame">
+            <img src="images/kompetitor.png" alt="Competitor Proximity Preview">
+        </div>
+    </div>
+
+    <div class="showcase-item">
+        <div class="showcase-text">
+            <span class="step-no">03</span>
+            <h3>Visual Heatmap & Search</h3>
+            <p>Temukan konsentrasi retail tertinggi di Bandung melalui heatmap. Gunakan fitur search cerdas untuk langsung 'terbang' ke lokasi kecamatan atau nama gerai spesifik.</p>
+        </div>
+        <div class="showcase-img glass-frame">
+            <img src="images/heatmap.png" alt="Heatmap Preview">
+        </div>
+    </div>
+</section>
+
+    <footer>
+        Built by <strong>Rayhan Rahman Miraj</strong> — RetailRay 2026.
+    </footer>
+
+</body>
+</html>
